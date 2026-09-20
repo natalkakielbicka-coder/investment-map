@@ -15,7 +15,11 @@ export const addRecentAddress = (address) => {
   const withoutDuplicate = current.filter((item) => item.label !== address.label)
   const updated = [address, ...withoutDuplicate].slice(0, MAX_ITEMS)
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
+  } catch {
+    // Historia pozostaje dostępna w bieżącej sesji komponentu.
+  }
 
   return updated
 }
