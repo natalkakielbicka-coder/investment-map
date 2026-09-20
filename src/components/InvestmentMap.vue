@@ -101,6 +101,7 @@ watch(
     marker = L.marker([newCenter.lat, newCenter.lon], {
       icon: createPinIcon('#000', 1.5),
     }).addTo(map)
+    marker.bindPopup(newCenter.label)
     circle = L.circle([newCenter.lat, newCenter.lon], { radius: radiusMeters.value }).addTo(map)
     loadNearbyPlaces(newCenter.lat, newCenter.lon)
   },
