@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { fetchNearbyPlaces } from '../composables/useOverpass.js'
@@ -80,6 +80,11 @@ const clearPlaceMarkers = () => {
 }
 
 const allPlaces = ref([])
+
+const availableGroups = computed(() => {
+  const foundGroups = new Set(allPlaces.value.map((place) => place.group))
+  return Object.keys(GROUP_LABELS).filter((group) => foundGroups.has(group))
+})
 
 const renderPlaceMarkers = () => {
   clearPlaceMarkers()
@@ -168,10 +173,10 @@ watch(visibleGroups, renderPlaceMarkers)
       <div class="sidebar__section">
         <span class="sidebar__heading">Kategorie</span>
         <div class="legend">
-          <label v-for="(label, group) in GROUP_LABELS" :key="group" class="legend-item">
+          <label v-for="group in availableGroups" :key="group" class="legend-item">
             <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
             <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
-            <span>{{ label }}</span>
+            <span>{{ GROUP_LABELS[group] }}</span>
           </label>
         </div>
       </div>
