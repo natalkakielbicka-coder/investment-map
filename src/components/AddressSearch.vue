@@ -1,11 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { getRecentAddresses, addRecentAddress } from '../composables/useRecentAddresses.js'
 
 const emit = defineEmits(['found'])
 
 const query = ref('')
 const isLoading = ref(false)
 const errorMessage = ref('')
+const recentAddresses = ref([])
+
+onMounted(() => {
+  recentAddresses.value = getRecentAddresses()
+})
 
 const searchAddress = async () => {
   if (!query.value.trim()) return
@@ -25,16 +31,24 @@ const searchAddress = async () => {
 
     const { lat, lon, display_name } = results[0]
 
-    emit('found', {
+    const location = {
       lat: parseFloat(lat),
       lon: parseFloat(lon),
       label: display_name,
-    })
+    }
+
+    emit('found', location)
+    recentAddresses.value = addRecentAddress(location)
   } catch (error) {
     errorMessage.value = 'Coś poszło nie tak. Spróbuj ponownie.'
   } finally {
     isLoading.value = false
   }
+}
+
+const selectRecent = (address) => {
+  query.value = address.label
+  emit('found', address)
 }
 </script>
 
@@ -48,6 +62,18 @@ const searchAddress = async () => {
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
   </form>
+
+  <div v-if="recentAddresses.length > 0" class="recent-addresses">
+    <button
+      v-for="address in recentAddresses"
+      :key="address.label"
+      type="button"
+      class="recent-addresses__item"
+      @click="selectRecent(address)"
+    >
+      {{ address.label }}
+    </button>
+  </div>
 </template>
 
 <style scoped>
@@ -74,5 +100,26 @@ const searchAddress = async () => {
   width: 100%;
   color: #c0392b;
   margin: 0;
+}
+
+.recent-addresses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.recent-addresses__item {
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+  color: #2980b9;
+  cursor: pointer;
+}
+
+.recent-addresses__item:hover {
+  text-decoration: underline;
 }
 </style>
