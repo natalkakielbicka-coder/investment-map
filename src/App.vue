@@ -11,9 +11,14 @@ const handleAddressFound = (location) => {
 </script>
 
 <template>
-  <main>
-    <h1>Mapa okolicy inwestycji</h1>
+  <main class="investment-map-widget">
     <AddressSearch @found="handleAddressFound" />
     <InvestmentMap :center="mapCenter" />
   </main>
 </template>
+
+<style scoped>
+.investment-map-widget {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+</style>

@@ -131,43 +131,71 @@ watch(radiusMeters, () => {
 </script>
 
 <template>
-  <div class="radius-controls">
-    <button type="button" :class="{ active: radiusMeters === 400 }" @click="setRadius(400)">
-      5 min
-    </button>
-    <button type="button" :class="{ active: radiusMeters === 800 }" @click="setRadius(800)">
-      10 min
-    </button>
-    <button type="button" :class="{ active: radiusMeters === 1200 }" @click="setRadius(1200)">
-      15 min
-    </button>
-  </div>
+  <div class="map-layout">
+    <aside class="sidebar">
+      <div class="sidebar__section">
+        <span class="sidebar__heading">Promień dojścia</span>
+        <div class="radius-controls">
+          <button type="button" :class="{ active: radiusMeters === 400 }" @click="setRadius(400)">
+            5 min
+          </button>
+          <button type="button" :class="{ active: radiusMeters === 800 }" @click="setRadius(800)">
+            10 min
+          </button>
+          <button type="button" :class="{ active: radiusMeters === 1200 }" @click="setRadius(1200)">
+            15 min
+          </button>
+        </div>
+      </div>
 
-  <div class="legend">
-    <div v-for="(label, group) in GROUP_LABELS" :key="group" class="legend-item">
-      <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
-      <span>{{ label }}</span>
-    </div>
-  </div>
+      <div class="sidebar__section">
+        <span class="sidebar__heading">Legenda</span>
+        <div class="legend">
+          <div v-for="(label, group) in GROUP_LABELS" :key="group" class="legend-item">
+            <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
+            <span>{{ label }}</span>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-  <div ref="mapContainer" class="map"></div>
+    <div ref="mapContainer" class="map"></div>
+  </div>
 </template>
 
 <style scoped>
-.map {
-  height: 500px;
-  width: 100%;
+.map-layout {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.sidebar {
+  width: 190px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.sidebar__heading {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #5a5f66;
+  margin-bottom: 0.5rem;
 }
 
 .radius-controls {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .radius-controls button {
   padding: 0.4rem 0.8rem;
   cursor: pointer;
+  text-align: left;
 }
 
 .radius-controls button.active {
@@ -178,16 +206,15 @@ watch(radiusMeters, () => {
 
 .legend {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 0.5rem;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 0.85rem;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
 .legend-dot {
@@ -195,5 +222,30 @@ watch(radiusMeters, () => {
   height: 10px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
+}
+
+.map {
+  height: 480px;
+  flex: 1;
+  min-width: 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+@media (max-width: 767px) {
+  .map-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .radius-controls {
+    flex-direction: row;
+  }
 }
 </style>
