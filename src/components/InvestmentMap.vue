@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { fetchNearbyPlaces } from '../composables/useOverpass.js'
@@ -39,6 +39,14 @@ const GROUP_LABELS = {
   other: 'Inne',
 }
 
+const visibleGroups = reactive(
+  Object.fromEntries(Object.keys(GROUP_LABELS).map((group) => [group, true])),
+)
+
+const toggleGroup = (group) => {
+  visibleGroups[group] = !visibleGroups[group]
+}
+
 const createPinIcon = (color, scale = 1) => {
   const width = 24 * scale
   const height = 32 * scale
@@ -71,20 +79,27 @@ const clearPlaceMarkers = () => {
   placeMarkers = []
 }
 
-const loadNearbyPlaces = async (lat, lon) => {
+const allPlaces = ref([])
+
+const renderPlaceMarkers = () => {
   clearPlaceMarkers()
 
-  const places = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
+  allPlaces.value
+    .filter((place) => visibleGroups[place.group])
+    .forEach((place) => {
+      const placeMarker = L.marker([place.lat, place.lon], {
+        icon: createPinIcon(GROUP_COLORS[place.group] || GROUP_COLORS.other),
+      })
+        .addTo(map)
+        .bindTooltip(place.name)
 
-  places.forEach((place) => {
-    const placeMarker = L.marker([place.lat, place.lon], {
-      icon: createPinIcon(GROUP_COLORS[place.group] || GROUP_COLORS.other),
+      placeMarkers.push(placeMarker)
     })
-      .addTo(map)
-      .bindTooltip(place.name)
+}
 
-    placeMarkers.push(placeMarker)
-  })
+const loadNearbyPlaces = async (lat, lon) => {
+  allPlaces.value = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
+  renderPlaceMarkers()
 }
 
 onMounted(() => {
@@ -128,6 +143,8 @@ watch(radiusMeters, () => {
 
   circle = L.circle([props.center.lat, props.center.lon], { radius: radiusMeters.value }).addTo(map)
 })
+
+watch(visibleGroups, renderPlaceMarkers)
 </script>
 
 <template>
@@ -149,12 +166,13 @@ watch(radiusMeters, () => {
       </div>
 
       <div class="sidebar__section">
-        <span class="sidebar__heading">Legenda</span>
+        <span class="sidebar__heading">Kategorie</span>
         <div class="legend">
-          <div v-for="(label, group) in GROUP_LABELS" :key="group" class="legend-item">
+          <label v-for="(label, group) in GROUP_LABELS" :key="group" class="legend-item">
+            <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
             <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
             <span>{{ label }}</span>
-          </div>
+          </label>
         </div>
       </div>
     </aside>
@@ -215,6 +233,7 @@ watch(radiusMeters, () => {
   display: flex;
   align-items: center;
   gap: 0.4rem;
+  cursor: pointer;
 }
 
 .legend-dot {
