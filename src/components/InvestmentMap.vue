@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { fetchNearbyPlaces } from '../composables/useOverpass.js'
 
 const props = defineProps({
   center: {
@@ -14,6 +15,7 @@ const mapContainer = ref(null)
 let map = null
 let marker = null
 let circle = null
+let placeMarkers = []
 const radiusMeters = ref(400)
 
 const setRadius = (meters) => {
@@ -24,6 +26,23 @@ const radiusLabel = (meters) => {
   if (meters === 400) return '5 min pieszo'
   if (meters === 800) return '10 min pieszo'
   return '15 min pieszo'
+}
+
+const clearPlaceMarkers = () => {
+  placeMarkers.forEach((placeMarker) => placeMarker.remove())
+  placeMarkers = []
+}
+
+const loadNearbyPlaces = async (lat, lon) => {
+  clearPlaceMarkers()
+
+  const places = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
+
+  places.forEach((place) => {
+    const placeMarker = L.marker([place.lat, place.lon]).addTo(map).bindTooltip(place.name)
+
+    placeMarkers.push(placeMarker)
+  })
 }
 
 onMounted(() => {
@@ -52,6 +71,7 @@ watch(
     marker = L.marker([newCenter.lat, newCenter.lon]).addTo(map)
     circle = L.circle([newCenter.lat, newCenter.lon], { radius: radiusMeters.value }).addTo(map)
     circle.bindTooltip(radiusLabel(radiusMeters.value), { permanent: true, direction: 'top' })
+    loadNearbyPlaces(newCenter.lat, newCenter.lon)
   },
 )
 
