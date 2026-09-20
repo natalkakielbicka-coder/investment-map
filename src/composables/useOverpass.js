@@ -51,6 +51,36 @@ const getDistanceMeters = (startLat, startLon, endLat, endLon) => {
   return Math.round(earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)))
 }
 
+const normalizeName = (name) => {
+  return name.trim().toLocaleLowerCase('pl-PL')
+}
+
+const removeDuplicatePlaces = (places) => {
+  return places.reduce((uniquePlaces, place) => {
+    if (!place.hasOwnName) {
+      uniquePlaces.push(place)
+      return uniquePlaces
+    }
+
+    const duplicate = uniquePlaces.some((savedPlace) => {
+      if (!savedPlace.hasOwnName) return false
+      if (savedPlace.group !== place.group) return false
+
+      if (normalizeName(savedPlace.name) !== normalizeName(place.name)) {
+        return false
+      }
+
+      return getDistanceMeters(savedPlace.lat, savedPlace.lon, place.lat, place.lon) <= 40
+    })
+
+    if (!duplicate) {
+      uniquePlaces.push(place)
+    }
+
+    return uniquePlaces
+  }, [])
+}
+
 export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
   const filters = CATEGORIES.map((category) => {
     return `nwr["${category.key}"="${category.value}"](around:${radiusMeters},${lat},${lon});`
@@ -76,7 +106,7 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
 
   const data = await response.json()
 
-  return data.elements
+  const places = data.elements
     .map((element) => {
       const category = findCategory(element.tags)
 
@@ -87,11 +117,18 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
         name: element.tags?.name || category?.label || 'Bez nazwy',
         label: category?.label || 'Inne',
         group: category?.group || 'other',
+        hasOwnName: Boolean(element.tags?.name),
       }
     })
     .filter((place) => Number.isFinite(place.lat) && Number.isFinite(place.lon))
-    .map((place) => ({
-      ...place,
-      distanceMeters: getDistanceMeters(lat, lon, place.lat, place.lon),
-    }))
+
+  return removeDuplicatePlaces(places).map((place) => ({
+    id: place.id,
+    lat: place.lat,
+    lon: place.lon,
+    name: place.name,
+    group: place.group,
+    label: place.label,
+    distanceMeters: getDistanceMeters(lat, lon, place.lat, place.lon),
+  }))
 }
