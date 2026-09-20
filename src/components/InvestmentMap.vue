@@ -28,9 +28,12 @@ const GROUP_COLORS = {
   other: '#34495e',
 }
 
-const createPinIcon = (color) => {
+const createPinIcon = (color, scale = 1) => {
+  const width = 24 * scale
+  const height = 32 * scale
+
   const svg = `
-    <svg width="24" height="32" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
+    <svg width="${width}" height="${height}" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
       <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z" fill="${color}" />
       <circle cx="12" cy="12" r="5" fill="white" />
     </svg>
@@ -39,8 +42,9 @@ const createPinIcon = (color) => {
   return L.divIcon({
     html: svg,
     className: 'pin-icon',
-    iconSize: [24, 32],
-    iconAnchor: [12, 32],
+    iconSize: [width, height],
+    iconAnchor: [width / 2, height],
+    tooltipAnchor: [0, -height],
   })
 }
 
@@ -48,12 +52,6 @@ const radiusMeters = ref(400)
 
 const setRadius = (meters) => {
   radiusMeters.value = meters
-}
-
-const radiusLabel = (meters) => {
-  if (meters === 400) return '5 min pieszo'
-  if (meters === 800) return '10 min pieszo'
-  return '15 min pieszo'
 }
 
 const clearPlaceMarkers = () => {
@@ -100,9 +98,10 @@ watch(
       circle.remove()
     }
 
-    marker = L.marker([newCenter.lat, newCenter.lon]).addTo(map)
+    marker = L.marker([newCenter.lat, newCenter.lon], {
+      icon: createPinIcon('#000', 1.5),
+    }).addTo(map)
     circle = L.circle([newCenter.lat, newCenter.lon], { radius: radiusMeters.value }).addTo(map)
-    circle.bindTooltip(radiusLabel(radiusMeters.value), { permanent: true, direction: 'top' })
     loadNearbyPlaces(newCenter.lat, newCenter.lon)
   },
 )
@@ -115,15 +114,20 @@ watch(radiusMeters, () => {
   }
 
   circle = L.circle([props.center.lat, props.center.lon], { radius: radiusMeters.value }).addTo(map)
-  circle.bindTooltip(radiusLabel(radiusMeters.value), { permanent: true, direction: 'top' })
 })
 </script>
 
 <template>
   <div class="radius-controls">
-    <button type="button" @click="setRadius(400)">5 min</button>
-    <button type="button" @click="setRadius(800)">10 min</button>
-    <button type="button" @click="setRadius(1200)">15 min</button>
+    <button type="button" :class="{ active: radiusMeters === 400 }" @click="setRadius(400)">
+      5 min
+    </button>
+    <button type="button" :class="{ active: radiusMeters === 800 }" @click="setRadius(800)">
+      10 min
+    </button>
+    <button type="button" :class="{ active: radiusMeters === 1200 }" @click="setRadius(1200)">
+      15 min
+    </button>
   </div>
 
   <div ref="mapContainer" class="map"></div>
@@ -144,5 +148,11 @@ watch(radiusMeters, () => {
 .radius-controls button {
   padding: 0.4rem 0.8rem;
   cursor: pointer;
+}
+
+.radius-controls button.active {
+  background-color: #2c3e50;
+  color: white;
+  border-color: #2c3e50;
 }
 </style>
