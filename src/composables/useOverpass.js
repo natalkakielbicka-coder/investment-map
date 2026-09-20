@@ -37,9 +37,9 @@ const findCategory = (tags) => {
   return CATEGORIES.find((category) => tags?.[category.key] === category.value)
 }
 
-export const fetchNearbyPlaces = async (lat, lon, radiusMeters) => {
+export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
   const filters = CATEGORIES.map((category) => {
-    return `node["${category.key}"="${category.value}"](around:${radiusMeters},${lat},${lon});`
+    return `nwr["${category.key}"="${category.value}"](around:${radiusMeters},${lat},${lon});`
   }).join('\n')
 
   const query = `
@@ -47,12 +47,13 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters) => {
     (
       ${filters}
     );
-    out body;
+    out center;
   `
 
   const response = await fetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
     body: query,
+    signal,
   })
 
   if (!response.ok) {
@@ -61,15 +62,17 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters) => {
 
   const data = await response.json()
 
-  return data.elements.map((element) => {
-    const category = findCategory(element.tags)
+  return data.elements
+    .map((element) => {
+      const category = findCategory(element.tags)
 
-    return {
-      id: element.id,
-      lat: element.lat,
-      lon: element.lon,
-      name: element.tags?.name || category?.label || 'Bez nazwy',
-      group: category?.group || 'other',
-    }
-  })
+      return {
+        id: `${element.type}-${element.id}`,
+        lat: element.lat ?? element.center?.lat,
+        lon: element.lon ?? element.center?.lon,
+        name: element.tags?.name || category?.label || 'Bez nazwy',
+        group: category?.group || 'other',
+      }
+    })
+    .filter((place) => Number.isFinite(place.lat) && Number.isFinite(place.lon))
 }

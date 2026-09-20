@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onMounted, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { fetchNearbyPlaces } from '../composables/useOverpass.js'
@@ -16,6 +16,8 @@ let map = null
 let marker = null
 let circle = null
 let placeMarkers = []
+let placesAbortController = null
+let placesRequestId = 0
 
 const GROUP_COLORS = {
   family: '#27ae60',
@@ -137,18 +139,33 @@ const renderPlaceMarkers = () => {
 }
 
 const loadNearbyPlaces = async (lat, lon) => {
+  placesAbortController?.abort()
+
+  const requestId = ++placesRequestId
+  const controller = new AbortController()
+
+  placesAbortController = controller
   isLoadingPlaces.value = true
   placesError.value = ''
 
   try {
-    allPlaces.value = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
+    const places = await fetchNearbyPlaces(lat, lon, radiusMeters.value, controller.signal)
+
+    if (requestId !== placesRequestId) return
+
+    allPlaces.value = places
     renderPlaceMarkers()
   } catch (error) {
+    if (error.name === 'AbortError') return
+    if (requestId !== placesRequestId) return
+
     placesError.value = error.message
     allPlaces.value = []
     clearPlaceMarkers()
   } finally {
-    isLoadingPlaces.value = false
+    if (requestId === placesRequestId) {
+      isLoadingPlaces.value = false
+    }
   }
 }
 
@@ -158,6 +175,12 @@ onMounted(() => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map)
+})
+
+onUnmounted(() => {
+  placesAbortController?.abort()
+  map?.remove()
+  map = null
 })
 
 const drawCircle = (center) => {
