@@ -223,7 +223,7 @@ watch(visibleGroups, renderPlaceMarkers)
         </div>
       </div>
 
-      <div class="sidebar__section">
+      <div v-if="center" class="sidebar__section">
         <div class="sidebar__row">
           <span class="sidebar__heading">Kategorie</span>
           <button
