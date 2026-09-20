@@ -23,6 +23,11 @@ const searchAddress = async () => {
   try {
     const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query.value)}`
     const response = await fetch(url)
+
+    if (!response.ok) {
+      throw new Error('Nie udało się pobrać adresu.')
+    }
+
     const results = await response.json()
 
     if (results.length === 0) {
@@ -42,7 +47,7 @@ const searchAddress = async () => {
     recentAddresses.value = addRecentAddress(location)
     query.value = ''
     inputEl.value?.blur()
-  } catch (error) {
+  } catch {
     errorMessage.value = 'Coś poszło nie tak. Spróbuj ponownie.'
   } finally {
     isLoading.value = false

@@ -213,7 +213,7 @@ watch(visibleGroups, renderPlaceMarkers)
   <div class="map-layout">
     <aside class="sidebar">
       <div class="sidebar__section">
-        <span class="sidebar__heading">Promień dojścia</span>
+        <span class="sidebar__heading">Orientacyjny czas dojścia</span>
         <div class="radius-controls">
           <button type="button" :class="{ active: radiusMeters === 400 }" @click="setRadius(400)">
             5 min
