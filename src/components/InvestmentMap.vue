@@ -132,10 +132,31 @@ const renderPlaceMarkers = () => {
         icon: createPinIcon(GROUP_COLORS[place.group] || GROUP_COLORS.other),
       })
         .addTo(map)
-        .bindTooltip(place.name)
+        .bindTooltip(createPlaceTooltip(place))
 
       placeMarkers.push(placeMarker)
     })
+}
+
+const formatDistance = (distanceMeters) => {
+  if (distanceMeters < 1000) {
+    return `${Math.round(distanceMeters / 10) * 10} m`
+  }
+
+  return `${(distanceMeters / 1000).toFixed(1).replace('.', ',')} km`
+}
+
+const createPlaceTooltip = (place) => {
+  const tooltip = document.createElement('div')
+  const name = document.createElement('strong')
+  const details = document.createElement('div')
+
+  name.textContent = place.name
+  details.textContent = `${place.label} · ${formatDistance(place.distanceMeters)}`
+
+  tooltip.append(name, details)
+
+  return tooltip
 }
 
 const loadNearbyPlaces = async (lat, lon) => {

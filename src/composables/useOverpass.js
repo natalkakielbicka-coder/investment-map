@@ -37,6 +37,20 @@ const findCategory = (tags) => {
   return CATEGORIES.find((category) => tags?.[category.key] === category.value)
 }
 
+const getDistanceMeters = (startLat, startLon, endLat, endLon) => {
+  const earthRadius = 6371000
+  const toRadians = (degrees) => (degrees * Math.PI) / 180
+
+  const latDistance = toRadians(endLat - startLat)
+  const lonDistance = toRadians(endLon - startLon)
+
+  const a =
+    Math.sin(latDistance / 2) ** 2 +
+    Math.cos(toRadians(startLat)) * Math.cos(toRadians(endLat)) * Math.sin(lonDistance / 2) ** 2
+
+  return Math.round(earthRadius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)))
+}
+
 export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
   const filters = CATEGORIES.map((category) => {
     return `nwr["${category.key}"="${category.value}"](around:${radiusMeters},${lat},${lon});`
@@ -71,8 +85,13 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
         lat: element.lat ?? element.center?.lat,
         lon: element.lon ?? element.center?.lon,
         name: element.tags?.name || category?.label || 'Bez nazwy',
+        label: category?.label || 'Inne',
         group: category?.group || 'other',
       }
     })
     .filter((place) => Number.isFinite(place.lat) && Number.isFinite(place.lon))
+    .map((place) => ({
+      ...place,
+      distanceMeters: getDistanceMeters(lat, lon, place.lat, place.lon),
+    }))
 }
