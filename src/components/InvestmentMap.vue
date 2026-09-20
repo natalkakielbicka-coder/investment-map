@@ -165,7 +165,13 @@ const drawCircle = (center) => {
     circle.remove()
   }
 
-  circle = L.circle([center.lat, center.lon], { radius: radiusMeters.value }).addTo(map)
+  circle = L.circle([center.lat, center.lon], {
+    radius: radiusMeters.value,
+    color: '#c79d62',
+    weight: 2,
+    fillColor: '#c79d62',
+    fillOpacity: 0.08,
+  }).addTo(map)
 }
 
 watch(
@@ -251,16 +257,16 @@ watch(visibleGroups, renderPlaceMarkers)
 <style scoped>
 .map-layout {
   display: flex;
-  gap: 1.25rem;
+  gap: 1.5rem;
   align-items: flex-start;
 }
 
 .sidebar {
-  width: 190px;
+  width: 200px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
 
 .sidebar__row {
@@ -268,19 +274,30 @@ watch(visibleGroups, renderPlaceMarkers)
   align-items: baseline;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .sidebar__row .sidebar__heading {
   margin-bottom: 0;
 }
 
+.sidebar__heading {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--imw-color-text-muted);
+  margin-bottom: 0.6rem;
+}
+
 .toggle-all {
   background: none;
   border: none;
   padding: 0;
+  font-family: inherit;
   font-size: 0.75rem;
-  color: #2980b9;
+  color: var(--imw-color-accent);
   cursor: pointer;
   text-decoration: underline;
 }
@@ -288,38 +305,52 @@ watch(visibleGroups, renderPlaceMarkers)
 .radius-controls {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .radius-controls button {
-  padding: 0.4rem 0.8rem;
+  padding: 0.5rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--imw-color-text);
+  background-color: var(--imw-color-surface);
+  border: 1px solid var(--imw-color-border);
+  border-radius: var(--imw-radius-small);
   cursor: pointer;
   text-align: left;
+  transition: all 0.15s ease;
 }
 
 .radius-controls button.active {
-  background-color: #2c3e50;
+  background-color: var(--imw-color-primary);
   color: white;
-  border-color: #2c3e50;
+  border-color: var(--imw-color-primary);
 }
 
 .legend {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
   font-size: 0.85rem;
 }
 
 .legend-item {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.legend-item input[type='checkbox'] {
+  accent-color: var(--imw-color-primary);
+  width: 15px;
+  height: 15px;
   cursor: pointer;
 }
 
 .legend-dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   display: inline-block;
   flex-shrink: 0;
@@ -329,18 +360,18 @@ watch(visibleGroups, renderPlaceMarkers)
   height: 480px;
   flex: 1;
   min-width: 0;
-  border-radius: 6px;
+  border-radius: var(--imw-radius-medium);
   overflow: hidden;
 }
 
 .status-text {
-  font-size: 0.85rem;
-  color: #5a5f66;
+  font-size: 0.82rem;
+  color: var(--imw-color-text-muted);
   margin: 0 0 0.5rem;
 }
 
 .status-text--error {
-  color: #c0392b;
+  color: #b33a3a;
 }
 
 @media (max-width: 767px) {

@@ -85,45 +85,75 @@ const selectRecent = (address) => {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .address-search input {
   flex: 1;
   min-width: 200px;
-  padding: 0.5rem;
-  font-size: 1rem;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--imw-color-text);
+  background-color: var(--imw-color-surface);
+  border: 1px solid var(--imw-color-border);
+  border-radius: var(--imw-radius-small);
+}
+
+.address-search input:focus {
+  outline: none;
+  border-color: var(--imw-color-accent);
+  box-shadow: 0 0 0 3px rgba(199, 157, 98, 0.25);
 }
 
 .address-search button {
-  padding: 0.5rem 1rem;
+  padding: 0.65rem 1.25rem;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  background-color: var(--imw-color-primary);
+  border: none;
+  border-radius: var(--imw-radius-small);
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.address-search button:hover:not(:disabled) {
+  background-color: #0f2b24;
+}
+
+.address-search button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .error {
   width: 100%;
-  color: #c0392b;
+  color: #b33a3a;
+  font-size: 0.85rem;
   margin: 0;
 }
 
 .recent-addresses {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
+  gap: 0.2rem;
+  margin: 0.5rem 0 1.5rem;
 }
 
 .recent-addresses__item {
   text-align: left;
   background: none;
   border: none;
-  padding: 0.25rem 0;
+  padding: 0.2rem 0;
+  font-family: inherit;
   font-size: 0.85rem;
-  color: #2980b9;
+  color: var(--imw-color-text-muted);
   cursor: pointer;
 }
 
 .recent-addresses__item:hover {
-  text-decoration: underline;
+  color: var(--imw-color-primary);
 }
 </style>
