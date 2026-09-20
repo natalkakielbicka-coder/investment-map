@@ -16,6 +16,18 @@ let map = null
 let marker = null
 let circle = null
 let placeMarkers = []
+
+const GROUP_COLORS = {
+  family: '#27ae60',
+  food: '#e67e22',
+  shopping: '#8e44ad',
+  health: '#e74c3c',
+  recreation: '#16a085',
+  services: '#2980b9',
+  transport: '#7f8c8d',
+  other: '#34495e',
+}
+
 const radiusMeters = ref(400)
 
 const setRadius = (meters) => {
@@ -39,7 +51,14 @@ const loadNearbyPlaces = async (lat, lon) => {
   const places = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
 
   places.forEach((place) => {
-    const placeMarker = L.marker([place.lat, place.lon]).addTo(map).bindTooltip(place.name)
+    const placeMarker = L.circleMarker([place.lat, place.lon], {
+      radius: 8,
+      color: GROUP_COLORS[place.group] || GROUP_COLORS.other,
+      fillColor: GROUP_COLORS[place.group] || GROUP_COLORS.other,
+      fillOpacity: 0.8,
+    })
+      .addTo(map)
+      .bindTooltip(place.name)
 
     placeMarkers.push(placeMarker)
   })
