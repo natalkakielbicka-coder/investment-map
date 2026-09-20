@@ -122,13 +122,15 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
     })
     .filter((place) => Number.isFinite(place.lat) && Number.isFinite(place.lon))
 
-  return removeDuplicatePlaces(places).map((place) => ({
-    id: place.id,
-    lat: place.lat,
-    lon: place.lon,
-    name: place.name,
-    group: place.group,
-    label: place.label,
-    distanceMeters: getDistanceMeters(lat, lon, place.lat, place.lon),
-  }))
+  return removeDuplicatePlaces(places)
+    .map((place) => ({
+      id: place.id,
+      lat: place.lat,
+      lon: place.lon,
+      name: place.name,
+      group: place.group,
+      label: place.label,
+      distanceMeters: getDistanceMeters(lat, lon, place.lat, place.lon),
+    }))
+    .sort((firstPlace, secondPlace) => firstPlace.distanceMeters - secondPlace.distanceMeters)
 }
