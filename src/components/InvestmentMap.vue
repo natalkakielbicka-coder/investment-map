@@ -89,6 +89,15 @@ const availableGroups = computed(() => {
   return Object.keys(GROUP_LABELS).filter((group) => foundGroups.has(group))
 })
 
+const noPlacesFound = computed(() => {
+  return (
+    Boolean(props.center) &&
+    !isLoadingPlaces.value &&
+    !placesError.value &&
+    allPlaces.value.length === 0
+  )
+})
+
 const renderPlaceMarkers = () => {
   clearPlaceMarkers()
 
@@ -190,6 +199,9 @@ watch(visibleGroups, renderPlaceMarkers)
         <span class="sidebar__heading">Kategorie</span>
         <p v-if="isLoadingPlaces" class="status-text">Szukam miejsc w okolicy...</p>
         <p v-if="placesError" class="status-text status-text--error">{{ placesError }}</p>
+        <p v-if="noPlacesFound" class="status-text">
+          Nie znaleziono nic w tym zasięgu — spróbuj większego promienia.
+        </p>
         <div class="legend">
           <label v-for="group in availableGroups" :key="group" class="legend-item">
             <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
