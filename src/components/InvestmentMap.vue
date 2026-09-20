@@ -89,6 +89,18 @@ const availableGroups = computed(() => {
   return Object.keys(GROUP_LABELS).filter((group) => foundGroups.has(group))
 })
 
+const allVisible = computed(() => {
+  return availableGroups.value.every((group) => visibleGroups[group])
+})
+
+const toggleAllGroups = () => {
+  const nextValue = !allVisible.value
+
+  availableGroups.value.forEach((group) => {
+    visibleGroups[group] = nextValue
+  })
+}
+
 const noPlacesFound = computed(() => {
   return (
     Boolean(props.center) &&
@@ -196,7 +208,17 @@ watch(visibleGroups, renderPlaceMarkers)
       </div>
 
       <div class="sidebar__section">
-        <span class="sidebar__heading">Kategorie</span>
+        <div class="sidebar__row">
+          <span class="sidebar__heading">Kategorie</span>
+          <button
+            v-if="availableGroups.length > 0"
+            type="button"
+            class="toggle-all"
+            @click="toggleAllGroups"
+          >
+            {{ allVisible ? 'Odznacz wszystkie' : 'Zaznacz wszystkie' }}
+          </button>
+        </div>
         <p v-if="isLoadingPlaces" class="status-text">Szukam miejsc w okolicy...</p>
         <p v-if="placesError" class="status-text status-text--error">{{ placesError }}</p>
         <p v-if="noPlacesFound" class="status-text">
@@ -231,12 +253,26 @@ watch(visibleGroups, renderPlaceMarkers)
   gap: 1.25rem;
 }
 
-.sidebar__heading {
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #5a5f66;
+.sidebar__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.5rem;
+}
+
+.sidebar__row .sidebar__heading {
+  margin-bottom: 0;
+}
+
+.toggle-all {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: #2980b9;
+  cursor: pointer;
+  text-decoration: underline;
 }
 
 .radius-controls {
