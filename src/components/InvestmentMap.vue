@@ -28,6 +28,17 @@ const GROUP_COLORS = {
   other: '#34495e',
 }
 
+const GROUP_LABELS = {
+  family: 'Edukacja i dzieci',
+  food: 'Jedzenie i rozrywka',
+  shopping: 'Zakupy',
+  health: 'Zdrowie',
+  recreation: 'Rekreacja',
+  services: 'Usługi',
+  transport: 'Transport',
+  other: 'Inne',
+}
+
 const createPinIcon = (color, scale = 1) => {
   const width = 24 * scale
   const height = 32 * scale
@@ -99,7 +110,7 @@ watch(
     }
 
     marker = L.marker([newCenter.lat, newCenter.lon], {
-      icon: createPinIcon('#000', 1.5),
+      icon: createPinIcon('#000', 1.8),
     }).addTo(map)
     marker.bindPopup(newCenter.label)
     circle = L.circle([newCenter.lat, newCenter.lon], { radius: radiusMeters.value }).addTo(map)
@@ -131,6 +142,13 @@ watch(radiusMeters, () => {
     </button>
   </div>
 
+  <div class="legend">
+    <div v-for="(label, group) in GROUP_LABELS" :key="group" class="legend-item">
+      <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
+      <span>{{ label }}</span>
+    </div>
+  </div>
+
   <div ref="mapContainer" class="map"></div>
 </template>
 
@@ -155,5 +173,26 @@ watch(radiusMeters, () => {
   background-color: #2c3e50;
   color: white;
   border-color: #2c3e50;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
 }
 </style>
