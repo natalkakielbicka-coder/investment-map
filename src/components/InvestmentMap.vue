@@ -28,6 +28,22 @@ const GROUP_COLORS = {
   other: '#34495e',
 }
 
+const createPinIcon = (color) => {
+  const svg = `
+    <svg width="24" height="32" viewBox="0 0 24 32" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 0C5.4 0 0 5.4 0 12c0 9 12 20 12 20s12-11 12-20c0-6.6-5.4-12-12-12z" fill="${color}" />
+      <circle cx="12" cy="12" r="5" fill="white" />
+    </svg>
+  `
+
+  return L.divIcon({
+    html: svg,
+    className: 'pin-icon',
+    iconSize: [24, 32],
+    iconAnchor: [12, 32],
+  })
+}
+
 const radiusMeters = ref(400)
 
 const setRadius = (meters) => {
@@ -51,11 +67,8 @@ const loadNearbyPlaces = async (lat, lon) => {
   const places = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
 
   places.forEach((place) => {
-    const placeMarker = L.circleMarker([place.lat, place.lon], {
-      radius: 8,
-      color: GROUP_COLORS[place.group] || GROUP_COLORS.other,
-      fillColor: GROUP_COLORS[place.group] || GROUP_COLORS.other,
-      fillOpacity: 0.8,
+    const placeMarker = L.marker([place.lat, place.lon], {
+      icon: createPinIcon(GROUP_COLORS[place.group] || GROUP_COLORS.other),
     })
       .addTo(map)
       .bindTooltip(place.name)
