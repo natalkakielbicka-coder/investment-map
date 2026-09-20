@@ -55,6 +55,10 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters) => {
     body: query,
   })
 
+  if (!response.ok) {
+    throw new Error('Serwer Overpass jest przeciążony. Spróbuj ponownie za chwilę.')
+  }
+
   const data = await response.json()
 
   return data.elements.map((element) => {

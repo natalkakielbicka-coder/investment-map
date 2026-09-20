@@ -81,6 +81,9 @@ const clearPlaceMarkers = () => {
 
 const allPlaces = ref([])
 
+const placesError = ref('')
+const isLoadingPlaces = ref(false)
+
 const availableGroups = computed(() => {
   const foundGroups = new Set(allPlaces.value.map((place) => place.group))
   return Object.keys(GROUP_LABELS).filter((group) => foundGroups.has(group))
@@ -103,8 +106,19 @@ const renderPlaceMarkers = () => {
 }
 
 const loadNearbyPlaces = async (lat, lon) => {
-  allPlaces.value = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
-  renderPlaceMarkers()
+  isLoadingPlaces.value = true
+  placesError.value = ''
+
+  try {
+    allPlaces.value = await fetchNearbyPlaces(lat, lon, radiusMeters.value)
+    renderPlaceMarkers()
+  } catch (error) {
+    placesError.value = error.message
+    allPlaces.value = []
+    clearPlaceMarkers()
+  } finally {
+    isLoadingPlaces.value = false
+  }
 }
 
 onMounted(() => {
@@ -114,6 +128,14 @@ onMounted(() => {
     attribution: '&copy; OpenStreetMap contributors',
   }).addTo(map)
 })
+
+const drawCircle = (center) => {
+  if (circle) {
+    circle.remove()
+  }
+
+  circle = L.circle([center.lat, center.lon], { radius: radiusMeters.value }).addTo(map)
+}
 
 watch(
   () => props.center,
@@ -126,15 +148,12 @@ watch(
       marker.remove()
     }
 
-    if (circle) {
-      circle.remove()
-    }
-
     marker = L.marker([newCenter.lat, newCenter.lon], {
       icon: createPinIcon('#000', 1.8),
     }).addTo(map)
     marker.bindPopup(newCenter.label)
-    circle = L.circle([newCenter.lat, newCenter.lon], { radius: radiusMeters.value }).addTo(map)
+
+    drawCircle(newCenter)
     loadNearbyPlaces(newCenter.lat, newCenter.lon)
   },
 )
@@ -142,11 +161,8 @@ watch(
 watch(radiusMeters, () => {
   if (!props.center || !map) return
 
-  if (circle) {
-    circle.remove()
-  }
-
-  circle = L.circle([props.center.lat, props.center.lon], { radius: radiusMeters.value }).addTo(map)
+  drawCircle(props.center)
+  loadNearbyPlaces(props.center.lat, props.center.lon)
 })
 
 watch(visibleGroups, renderPlaceMarkers)
@@ -172,6 +188,8 @@ watch(visibleGroups, renderPlaceMarkers)
 
       <div class="sidebar__section">
         <span class="sidebar__heading">Kategorie</span>
+        <p v-if="isLoadingPlaces" class="status-text">Szukam miejsc w okolicy...</p>
+        <p v-if="placesError" class="status-text status-text--error">{{ placesError }}</p>
         <div class="legend">
           <label v-for="group in availableGroups" :key="group" class="legend-item">
             <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
@@ -255,6 +273,16 @@ watch(visibleGroups, renderPlaceMarkers)
   min-width: 0;
   border-radius: 6px;
   overflow: hidden;
+}
+
+.status-text {
+  font-size: 0.85rem;
+  color: #5a5f66;
+  margin: 0 0 0.5rem;
+}
+
+.status-text--error {
+  color: #c0392b;
 }
 
 @media (max-width: 767px) {
