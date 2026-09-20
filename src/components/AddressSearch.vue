@@ -21,7 +21,15 @@ const searchAddress = async () => {
   errorMessage.value = ''
 
   try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query.value)}`
+    const params = new URLSearchParams({
+      format: 'json',
+      limit: '1',
+      countrycodes: 'pl',
+      'accept-language': 'pl',
+      q: query.value,
+    })
+
+    const url = `https://nominatim.openstreetmap.org/search?${params}`
     const response = await fetch(url)
 
     if (!response.ok) {
