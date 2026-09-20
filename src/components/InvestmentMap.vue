@@ -56,6 +56,7 @@ const createPinIcon = (color, scale = 1) => {
     iconSize: [width, height],
     iconAnchor: [width / 2, height],
     tooltipAnchor: [0, -height],
+    popupAnchor: [0, -height],
   })
 }
 
