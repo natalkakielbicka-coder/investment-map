@@ -13,6 +13,18 @@ const props = defineProps({
 const mapContainer = ref(null)
 let map = null
 let marker = null
+let circle = null
+const radiusMeters = ref(400)
+
+const setRadius = (meters) => {
+  radiusMeters.value = meters
+}
+
+const radiusLabel = (meters) => {
+  if (meters === 400) return '5 min pieszo'
+  if (meters === 800) return '10 min pieszo'
+  return '15 min pieszo'
+}
 
 onMounted(() => {
   map = L.map(mapContainer.value).setView([52.2297, 21.0122], 13)
@@ -33,12 +45,35 @@ watch(
       marker.remove()
     }
 
+    if (circle) {
+      circle.remove()
+    }
+
     marker = L.marker([newCenter.lat, newCenter.lon]).addTo(map)
+    circle = L.circle([newCenter.lat, newCenter.lon], { radius: radiusMeters.value }).addTo(map)
+    circle.bindTooltip(radiusLabel(radiusMeters.value), { permanent: true, direction: 'top' })
   },
 )
+
+watch(radiusMeters, () => {
+  if (!props.center || !map) return
+
+  if (circle) {
+    circle.remove()
+  }
+
+  circle = L.circle([props.center.lat, props.center.lon], { radius: radiusMeters.value }).addTo(map)
+  circle.bindTooltip(radiusLabel(radiusMeters.value), { permanent: true, direction: 'top' })
+})
 </script>
 
 <template>
+  <div class="radius-controls">
+    <button type="button" @click="setRadius(400)">5 min</button>
+    <button type="button" @click="setRadius(800)">10 min</button>
+    <button type="button" @click="setRadius(1200)">15 min</button>
+  </div>
+
   <div ref="mapContainer" class="map"></div>
 </template>
 
@@ -46,5 +81,16 @@ watch(
 .map {
   height: 500px;
   width: 100%;
+}
+
+.radius-controls {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.radius-controls button {
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
 }
 </style>
