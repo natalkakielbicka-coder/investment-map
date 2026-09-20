@@ -172,14 +172,18 @@ const drawCircle = (center) => {
     fillColor: '#c79d62',
     fillOpacity: 0.08,
   }).addTo(map)
+
+  map.fitBounds(circle.getBounds(), {
+    padding: [32, 32],
+    maxZoom: 16,
+    animate: true,
+  })
 }
 
 watch(
   () => props.center,
   (newCenter) => {
     if (!newCenter || !map) return
-
-    map.setView([newCenter.lat, newCenter.lon], 16)
 
     if (marker) {
       marker.remove()
