@@ -5,6 +5,7 @@ import { getRecentAddresses, addRecentAddress } from '../composables/useRecentAd
 const emit = defineEmits(['found'])
 
 const query = ref('')
+const inputEl = ref(null)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const recentAddresses = ref([])
@@ -39,6 +40,8 @@ const searchAddress = async () => {
 
     emit('found', location)
     recentAddresses.value = addRecentAddress(location)
+    query.value = ''
+    inputEl.value?.blur()
   } catch (error) {
     errorMessage.value = 'Coś poszło nie tak. Spróbuj ponownie.'
   } finally {
@@ -47,14 +50,15 @@ const searchAddress = async () => {
 }
 
 const selectRecent = (address) => {
-  query.value = address.label
   emit('found', address)
+  query.value = ''
+  inputEl.value?.blur()
 }
 </script>
 
 <template>
   <form class="address-search" @submit.prevent="searchAddress">
-    <input v-model="query" type="text" placeholder="Wpisz adres inwestycji..." />
+    <input ref="inputEl" v-model="query" type="text" placeholder="Wpisz adres inwestycji..." />
 
     <button type="submit" :disabled="isLoading">
       {{ isLoading ? 'Szukam...' : 'Szukaj' }}
