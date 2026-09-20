@@ -70,14 +70,27 @@ const selectRecent = (address) => {
 </script>
 
 <template>
-  <form class="address-search" @submit.prevent="searchAddress">
-    <input ref="inputEl" v-model="query" type="text" placeholder="Wpisz adres inwestycji..." />
+  <form class="address-search" role="search" @submit.prevent="searchAddress">
+    <label class="sr-only" for="investment-address"> Adres inwestycji </label>
+
+    <input
+      id="investment-address"
+      ref="inputEl"
+      v-model="query"
+      type="search"
+      placeholder="Wpisz adres inwestycji..."
+      autocomplete="street-address"
+      :aria-describedby="errorMessage ? 'address-search-error' : undefined"
+      :aria-invalid="Boolean(errorMessage)"
+    />
 
     <button type="submit" :disabled="isLoading">
       {{ isLoading ? 'Szukam...' : 'Szukaj' }}
     </button>
 
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <p v-if="errorMessage" id="address-search-error" class="error" role="alert">
+      {{ errorMessage }}
+    </p>
   </form>
 
   <div v-if="recentAddresses.length > 0" class="recent-addresses">
@@ -168,5 +181,17 @@ const selectRecent = (address) => {
 
 .recent-addresses__item:hover {
   color: var(--imw-color-primary);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>

@@ -235,20 +235,38 @@ watch(visibleGroups, renderPlaceMarkers)
 <template>
   <div class="map-layout">
     <aside class="sidebar">
-      <div class="sidebar__section">
-        <span class="sidebar__heading">Orientacyjny czas dojścia</span>
+      <fieldset class="sidebar__section sidebar__fieldset">
+        <legend class="sidebar__heading">Orientacyjny czas dojścia</legend>
+
         <div class="radius-controls">
-          <button type="button" :class="{ active: radiusMeters === 400 }" @click="setRadius(400)">
+          <button
+            type="button"
+            :class="{ active: radiusMeters === 400 }"
+            :aria-pressed="radiusMeters === 400"
+            @click="setRadius(400)"
+          >
             5 min
           </button>
-          <button type="button" :class="{ active: radiusMeters === 800 }" @click="setRadius(800)">
+
+          <button
+            type="button"
+            :class="{ active: radiusMeters === 800 }"
+            :aria-pressed="radiusMeters === 800"
+            @click="setRadius(800)"
+          >
             10 min
           </button>
-          <button type="button" :class="{ active: radiusMeters === 1200 }" @click="setRadius(1200)">
+
+          <button
+            type="button"
+            :class="{ active: radiusMeters === 1200 }"
+            :aria-pressed="radiusMeters === 1200"
+            @click="setRadius(1200)"
+          >
             15 min
           </button>
         </div>
-      </div>
+      </fieldset>
 
       <div v-if="center" class="sidebar__section">
         <div class="sidebar__row">
@@ -262,11 +280,17 @@ watch(visibleGroups, renderPlaceMarkers)
             {{ allVisible ? 'Odznacz wszystkie' : 'Zaznacz wszystkie' }}
           </button>
         </div>
-        <p v-if="isLoadingPlaces" class="status-text">Szukam miejsc w okolicy...</p>
-        <p v-if="placesError" class="status-text status-text--error">{{ placesError }}</p>
-        <p v-if="noPlacesFound" class="status-text">
-          Nie znaleziono nic w tym zasięgu — spróbuj większego promienia.
-        </p>
+        <div aria-live="polite" aria-atomic="true">
+          <p v-if="isLoadingPlaces" class="status-text">Szukam miejsc w okolicy...</p>
+
+          <p v-else-if="placesError" class="status-text status-text--error">
+            {{ placesError }}
+          </p>
+
+          <p v-else-if="noPlacesFound" class="status-text">
+            Nie znaleziono nic w tym zasięgu — spróbuj większego promienia.
+          </p>
+        </div>
         <div class="legend">
           <label v-for="group in availableGroups" :key="group" class="legend-item">
             <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
@@ -306,6 +330,25 @@ watch(visibleGroups, renderPlaceMarkers)
 
 .sidebar__row .sidebar__heading {
   margin-bottom: 0;
+}
+
+.sidebar__fieldset {
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .sidebar__heading {
