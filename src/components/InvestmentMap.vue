@@ -89,6 +89,16 @@ const availableGroups = computed(() => {
   return Object.keys(GROUP_LABELS).filter((group) => foundGroups.has(group))
 })
 
+const groupCounts = computed(() => {
+  const counts = {}
+
+  allPlaces.value.forEach((place) => {
+    counts[place.group] = (counts[place.group] || 0) + 1
+  })
+
+  return counts
+})
+
 const allVisible = computed(() => {
   return availableGroups.value.every((group) => visibleGroups[group])
 })
@@ -228,7 +238,7 @@ watch(visibleGroups, renderPlaceMarkers)
           <label v-for="group in availableGroups" :key="group" class="legend-item">
             <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
             <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
-            <span>{{ GROUP_LABELS[group] }}</span>
+            <span>{{ GROUP_LABELS[group] }} ({{ groupCounts[group] }})</span>
           </label>
         </div>
       </div>
