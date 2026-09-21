@@ -533,16 +533,37 @@ watch(visibleGroups, renderPlaceMarkers)
 @media (max-width: 767px) {
   .map-layout {
     flex-direction: column;
+    gap: 1rem;
   }
 
   .sidebar {
     width: 100%;
-    flex-direction: row;
-    flex-wrap: wrap;
+    gap: 1rem;
   }
 
   .radius-controls {
     flex-direction: row;
+  }
+
+  .radius-controls button {
+    flex: 1;
+    min-height: 44px;
+    text-align: center;
+  }
+
+  .map {
+    width: 100%;
+    height: 420px;
+  }
+
+  .nearest-places {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .map {
+    height: 360px;
   }
 }
 </style>

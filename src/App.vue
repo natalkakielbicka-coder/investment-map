@@ -50,4 +50,16 @@ const handleAddressFound = (location) => {
   color: var(--imw-color-primary);
   margin: 0 0 1.5rem;
 }
+
+@media (max-width: 767px) {
+  .investment-map-widget {
+    padding: 1rem;
+    border-radius: var(--imw-radius-medium);
+  }
+
+  .investment-map-widget__title {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+  }
+}
 </style>

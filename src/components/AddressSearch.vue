@@ -200,4 +200,27 @@ const selectRecent = (address) => {
   white-space: nowrap;
   border: 0;
 }
+
+@media (max-width: 767px) {
+  .address-search {
+    gap: 0.65rem;
+  }
+
+  .address-search input,
+  .address-search button {
+    width: 100%;
+  }
+
+  .address-search input {
+    min-width: 0;
+  }
+
+  .address-search button {
+    min-height: 44px;
+  }
+
+  .recent-addresses {
+    margin-bottom: 1rem;
+  }
+}
 </style>
