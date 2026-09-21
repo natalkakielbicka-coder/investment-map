@@ -15,7 +15,7 @@ const mapContainer = ref(null)
 let map = null
 let marker = null
 let circle = null
-let placeMarkers = []
+const placeMarkers = new Map()
 let placesAbortController = null
 let placesRequestId = 0
 
@@ -78,7 +78,7 @@ const setRadius = (meters) => {
 
 const clearPlaceMarkers = () => {
   placeMarkers.forEach((placeMarker) => placeMarker.remove())
-  placeMarkers = []
+  placeMarkers.clear()
 }
 
 const allPlaces = ref([])
@@ -103,6 +103,10 @@ const groupCounts = computed(() => {
 
 const allVisible = computed(() => {
   return availableGroups.value.every((group) => visibleGroups[group])
+})
+
+const nearestVisiblePlaces = computed(() => {
+  return allPlaces.value.filter((place) => visibleGroups[place.group]).slice(0, 6)
 })
 
 const toggleAllGroups = () => {
@@ -134,8 +138,17 @@ const renderPlaceMarkers = () => {
         .addTo(map)
         .bindTooltip(createPlaceTooltip(place))
 
-      placeMarkers.push(placeMarker)
+      placeMarkers.set(place.id, placeMarker)
     })
+}
+
+const focusPlace = (place) => {
+  const placeMarker = placeMarkers.get(place.id)
+
+  if (!placeMarker) return
+
+  map.panTo([place.lat, place.lon])
+  placeMarker.openTooltip()
 }
 
 const formatDistance = (distanceMeters) => {
@@ -258,6 +271,27 @@ watch(visibleGroups, renderPlaceMarkers)
     <aside class="sidebar">
       <fieldset class="sidebar__section sidebar__fieldset">
         <legend class="sidebar__heading">Orientacyjny czas dojścia</legend>
+
+        <div v-if="nearestVisiblePlaces.length > 0" class="nearest-places">
+          <span class="sidebar__heading">Najbliżej</span>
+
+          <button
+            v-for="place in nearestVisiblePlaces"
+            :key="place.id"
+            type="button"
+            class="nearest-place"
+            @click="focusPlace(place)"
+          >
+            <span class="nearest-place__name">
+              {{ place.name }}
+            </span>
+
+            <span class="nearest-place__details">
+              {{ place.label }} ·
+              {{ formatDistance(place.distanceMeters) }}
+            </span>
+          </button>
+        </div>
 
         <div class="radius-controls">
           <button
@@ -463,6 +497,37 @@ watch(visibleGroups, renderPlaceMarkers)
 
 .status-text--error {
   color: #b33a3a;
+}
+
+.nearest-places {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 1.5rem;
+}
+
+.nearest-place {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.45rem 0;
+  font-family: inherit;
+  color: var(--imw-color-text);
+  text-align: left;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--imw-color-border);
+  cursor: pointer;
+}
+
+.nearest-place__name {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.nearest-place__details {
+  font-size: 0.75rem;
+  color: var(--imw-color-text-muted);
 }
 
 @media (max-width: 767px) {
