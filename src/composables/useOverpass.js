@@ -83,7 +83,7 @@ const removeDuplicatePlaces = (places) => {
 
 export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
   const filters = CATEGORIES.map((category) => {
-    return `nwr["${category.key}"="${category.value}"](around:${radiusMeters},${lat},${lon});`
+    return `node["${category.key}"="${category.value}"](around:${radiusMeters},${lat},${lon});`
   }).join('\n')
 
   const query = `
@@ -91,7 +91,7 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
     (
       ${filters}
     );
-    out center;
+    out body;
   `
 
   const response = await fetch('https://overpass-api.de/api/interpreter', {
@@ -101,7 +101,7 @@ export const fetchNearbyPlaces = async (lat, lon, radiusMeters, signal) => {
   })
 
   if (!response.ok) {
-    throw new Error('Serwer Overpass jest przeciążony. Spróbuj ponownie za chwilę.')
+    throw new Error(`Nie udało się pobrać miejsc z mapy (błąd ${response.status}).`)
   }
 
   const data = await response.json()
