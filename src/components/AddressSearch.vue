@@ -15,7 +15,13 @@ onMounted(() => {
 })
 
 const searchAddress = async () => {
-  if (!query.value.trim()) return
+  const normalizedQuery = query.value.trim()
+
+  if (normalizedQuery.length < 3) {
+    errorMessage.value = 'Wpisz co najmniej 3 znaki.'
+    inputEl.value?.focus()
+    return
+  }
 
   isLoading.value = true
   errorMessage.value = ''
@@ -26,7 +32,7 @@ const searchAddress = async () => {
       limit: '1',
       countrycodes: 'pl',
       'accept-language': 'pl',
-      q: query.value,
+      q: normalizedQuery,
     })
 
     const url = `https://nominatim.openstreetmap.org/search?${params}`
