@@ -18,6 +18,7 @@ let circle = null
 const placeMarkers = new Map()
 let placesAbortController = null
 let placesRequestId = 0
+const isCategoriesOpen = ref(true)
 
 const GROUP_COLORS = {
   family: '#27ae60',
@@ -204,6 +205,8 @@ const loadNearbyPlaces = async (lat, lon) => {
 }
 
 onMounted(() => {
+  isCategoriesOpen.value = !window.matchMedia('(max-width: 767px)').matches
+
   map = L.map(mapContainer.value).setView([52.2297, 21.0122], 13)
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -272,27 +275,6 @@ watch(visibleGroups, renderPlaceMarkers)
       <fieldset class="sidebar__section sidebar__fieldset">
         <legend class="sidebar__heading">Orientacyjny czas dojścia</legend>
 
-        <div v-if="nearestVisiblePlaces.length > 0" class="nearest-places">
-          <span class="sidebar__heading">Najbliżej</span>
-
-          <button
-            v-for="place in nearestVisiblePlaces"
-            :key="place.id"
-            type="button"
-            class="nearest-place"
-            @click="focusPlace(place)"
-          >
-            <span class="nearest-place__name">
-              {{ place.name }}
-            </span>
-
-            <span class="nearest-place__details">
-              {{ place.label }} ·
-              {{ formatDistance(place.distanceMeters) }}
-            </span>
-          </button>
-        </div>
-
         <div class="radius-controls">
           <button
             type="button"
@@ -323,9 +305,34 @@ watch(visibleGroups, renderPlaceMarkers)
         </div>
       </fieldset>
 
-      <div v-if="center" class="sidebar__section">
+      <button
+        v-if="center"
+        type="button"
+        class="categories-toggle"
+        :aria-expanded="isCategoriesOpen"
+        aria-controls="map-categories"
+        @click="isCategoriesOpen = !isCategoriesOpen"
+      >
+        <span>Kategorie i najbliższe miejsca</span>
+
+        <span aria-hidden="true">
+          {{ isCategoriesOpen ? '−' : '+' }}
+        </span>
+      </button>
+
+      <fieldset
+        v-if="center"
+        id="map-categories"
+        class="sidebar__section sidebar__fieldset sidebar__categories"
+        :class="{
+          'is-mobile-collapsed': !isCategoriesOpen,
+        }"
+      >
+        <legend class="sr-only">Kategorie miejsc w okolicy</legend>
+
         <div class="sidebar__row">
           <span class="sidebar__heading">Kategorie</span>
+
           <button
             v-if="availableGroups.length > 0"
             type="button"
@@ -335,6 +342,7 @@ watch(visibleGroups, renderPlaceMarkers)
             {{ allVisible ? 'Odznacz wszystkie' : 'Zaznacz wszystkie' }}
           </button>
         </div>
+
         <div aria-live="polite" aria-atomic="true">
           <p v-if="isLoadingPlaces" class="status-text">Szukam miejsc w okolicy...</p>
 
@@ -346,14 +354,46 @@ watch(visibleGroups, renderPlaceMarkers)
             Nie znaleziono nic w tym zasięgu — spróbuj większego promienia.
           </p>
         </div>
+
         <div class="legend">
           <label v-for="group in availableGroups" :key="group" class="legend-item">
             <input type="checkbox" :checked="visibleGroups[group]" @change="toggleGroup(group)" />
-            <span class="legend-dot" :style="{ backgroundColor: GROUP_COLORS[group] }"></span>
-            <span>{{ GROUP_LABELS[group] }} ({{ groupCounts[group] }})</span>
+
+            <span
+              class="legend-dot"
+              :style="{
+                backgroundColor: GROUP_COLORS[group],
+              }"
+            ></span>
+
+            <span>
+              {{ GROUP_LABELS[group] }}
+              ({{ groupCounts[group] }})
+            </span>
           </label>
         </div>
-      </div>
+
+        <div v-if="nearestVisiblePlaces.length > 0" class="nearest-places">
+          <span class="sidebar__heading"> Najbliżej </span>
+
+          <button
+            v-for="place in nearestVisiblePlaces"
+            :key="place.id"
+            type="button"
+            class="nearest-place"
+            @click="focusPlace(place)"
+          >
+            <span class="nearest-place__name">
+              {{ place.name }}
+            </span>
+
+            <span class="nearest-place__details">
+              {{ place.label }} ·
+              {{ formatDistance(place.distanceMeters) }}
+            </span>
+          </button>
+        </div>
+      </fieldset>
     </aside>
 
     <div ref="mapContainer" class="map"></div>
@@ -530,6 +570,10 @@ watch(visibleGroups, renderPlaceMarkers)
   color: var(--imw-color-text-muted);
 }
 
+.categories-toggle {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .map-layout {
     flex-direction: column;
@@ -558,6 +602,27 @@ watch(visibleGroups, renderPlaceMarkers)
 
   .nearest-places {
     margin-top: 1rem;
+  }
+
+  .categories-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.7rem 0.9rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--imw-color-primary);
+    background: var(--imw-color-surface);
+    border: 1px solid var(--imw-color-border);
+    border-radius: var(--imw-radius-small);
+    cursor: pointer;
+  }
+
+  .sidebar__categories.is-mobile-collapsed {
+    display: none;
   }
 }
 
