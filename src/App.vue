@@ -13,6 +13,10 @@ const handleAddressFound = (location) => {
 <template>
   <main class="investment-map-widget">
     <h1 class="investment-map-widget__title">Mapa okolicy inwestycji</h1>
+    <p class="investment-map-widget__notice">
+      Wersja demonstracyjna. Dane o okolicy są pobierane z publicznych usług OpenStreetMap, dlatego
+      wyniki mogą być chwilowo niedostępne.
+    </p>
     <AddressSearch @found="handleAddressFound" />
     <InvestmentMap :center="mapCenter" />
   </main>
@@ -51,6 +55,18 @@ const handleAddressFound = (location) => {
   margin: 0 0 1.5rem;
 }
 
+.investment-map-widget__notice {
+  padding: 0.875rem 1rem;
+  border: 1px solid rgba(199, 157, 98, 0.45);
+  border-left: 4px solid var(--imw-color-accent);
+  border-radius: var(--imw-radius-small);
+  margin: 0 0 1.5rem;
+  background: rgba(199, 157, 98, 0.1);
+  color: var(--imw-color-text-muted);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
 @media (max-width: 767px) {
   .investment-map-widget {
     padding: 1rem;
@@ -60,6 +76,10 @@ const handleAddressFound = (location) => {
   .investment-map-widget__title {
     margin-bottom: 1rem;
     font-size: 1.5rem;
+  }
+
+  .investment-map-widget__notice {
+    margin-bottom: 1rem;
   }
 }
 </style>
